@@ -10,7 +10,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { feedDiscoveryServiceUrl } from '../../../config';
 import useAuth from '../../../hooks/use-auth';
 import { SignUpForm, DiscoveredFeed, DiscoveredFeeds } from '../../../interfaces';
-import { TextInput, CheckBoxInput } from '../FormFields';
+import { TextInput } from '../FormFields';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -136,6 +136,10 @@ const useStyles = makeStyles((theme: Theme) =>
       height: '10px',
       color: '#474747',
     },
+    helpTextExample: {
+      fontSize: '.9em',
+      fontWeight: 'normal',
+    },
   })
 );
 
@@ -144,15 +148,12 @@ type RSSFeedsFormProps = {
     selected: 'blogs' | 'channels';
     discovered: 'allBlogs' | 'allChannels';
   };
-  prompt: string;
+  prompt?: string;
+  promptExamples?: Array<string>;
   title: string;
   buttonText: string;
   helperText: string;
   input: {
-    name: string;
-    label: string;
-  };
-  agreement: {
     name: string;
     label: string;
   };
@@ -163,11 +164,11 @@ const RSSFeeds = connect<RSSFeedsFormProps, SignUpForm>(
   ({
     feeds: { selected, discovered },
     prompt,
+    promptExamples,
     title,
     buttonText,
     helperText,
     noFeedsSelected,
-    agreement,
     input,
     formik,
   }) => {
@@ -232,6 +233,17 @@ const RSSFeeds = connect<RSSFeedsFormProps, SignUpForm>(
       setFieldValue(selected, selectedFeeds, true);
     };
 
+    // Parse FeedUrl by Type to produce desired output for confirmation
+    const parseFeedUrlByType = ({ feedUrl, type }: DiscoveredFeed) => {
+      // For twitch URL on channel feed page, parse the feed url to find the twitch URL
+      if (type === 'twitch') {
+        const result = feedUrl.match(/https?:\/\/www.twitch.tv\/\w+/);
+        return result ? result[0] : feedUrl;
+      }
+      // By default, return the original feed url
+      return feedUrl;
+    };
+
     useEffect(() => {
       if (errors[input.name as keyof SignUpForm]) {
         validateBlog();
@@ -247,7 +259,13 @@ const RSSFeeds = connect<RSSFeedsFormProps, SignUpForm>(
       <div className={classes.root}>
         <div className={classes.container}>
           <h1 className={classes.blogPageTitle}>{title}</h1>
-          <h2 className={classes.helpText}>{prompt}</h2>
+          <h2 className={classes.helpText}>
+            {prompt}
+            {promptExamples?.map((example) => (
+              <div className={classes.helpTextExample}>{example}</div>
+            ))}
+          </h2>
+
           <div className={classes.infoContainer}>
             <div className={classes.inputsContainer}>
               <TextInput
@@ -276,7 +294,7 @@ const RSSFeeds = connect<RSSFeedsFormProps, SignUpForm>(
                           }
                           label={
                             <h1 className={classes.formControlLabel}>
-                              {feed.type}: {feed.feedUrl}
+                              {feed.type}: {parseFeedUrlByType(feed)}
                             </h1>
                           }
                         />
@@ -296,11 +314,6 @@ const RSSFeeds = connect<RSSFeedsFormProps, SignUpForm>(
               </div>
             </div>
           </div>
-          <CheckBoxInput
-            label={agreement.label}
-            name={agreement.name}
-            checked={values[agreement.name as keyof SignUpForm] as boolean}
-          />
         </div>
       </div>
     );

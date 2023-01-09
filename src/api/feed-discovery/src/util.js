@@ -20,6 +20,27 @@ const toTwitchFeedUrl = (twitchChannelUrl) => {
   throw new Error('not a Twitch URL');
 };
 
+const isFeedUrl = async (url) => {
+  try {
+    const { statusCode, headers } = await got(url);
+    const contentType = headers['content-type'];
+    const validContentTypes = [
+      'application/xml',
+      'application/rss+xml',
+      'application/atom+xml',
+      'application/x.atom+xml',
+      'application/x-atom+xml',
+      'application/json',
+      'application/json+oembed',
+      'application/xml+oembed',
+    ];
+
+    return statusCode === 200 && validContentTypes.some((ct) => contentType.includes(ct));
+  } catch (err) {
+    return false;
+  }
+};
+
 const getBlogBody = async (blogUrl) => {
   try {
     logger.debug({ blogUrl }, 'Getting blog body');
@@ -55,6 +76,17 @@ const getFeedUrlType = (feedUrl) => {
   }
 };
 
+// return true if the feedURL is a relevant URL that we want to keep
+const relevantFeedUrl = (feedUrl) => {
+  const invalidPathMatchers = [
+    /\/comments\/feed\/$/, // wordpress.com comments feed
+    /^https:\/\/public-api.wordpress.com\/oembed/,
+    /^https:\/\/www.blogger.com\/feeds\/[0-9]*\/posts\/default$/,
+    /\/feeds\/posts\/default\?alt=rss$/, // blogspot.com alternate rss feed
+  ];
+  return invalidPathMatchers.every((matcher) => !matcher.test(feedUrl));
+};
+
 // Helper function to return the feed url of a given blog url
 const getFeedUrls = (document) => {
   try {
@@ -82,10 +114,12 @@ const getFeedUrls = (document) => {
     if (links.length > 0) {
       for (let i = 0; i < links.length; i += 1) {
         const feedUrl = links[i].attribs.href;
-        feedUrls.push({
-          feedUrl,
-          type: getFeedUrlType(feedUrl),
-        });
+        if (relevantFeedUrl(feedUrl)) {
+          feedUrls.push({
+            feedUrl,
+            type: getFeedUrlType(feedUrl),
+          });
+        }
       }
     }
 
@@ -101,3 +135,5 @@ module.exports.getBlogBody = getBlogBody;
 module.exports.getFeedUrls = getFeedUrls;
 module.exports.isTwitchUrl = isTwitchUrl;
 module.exports.toTwitchFeedUrl = toTwitchFeedUrl;
+module.exports.isFeedUrl = isFeedUrl;
+module.exports.relevantFeedUrl = relevantFeedUrl;

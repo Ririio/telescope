@@ -31,7 +31,7 @@ describe('POST /', () => {
       };
 
       // Mocking the response body html when call GET request to blog url
-      nock(blogUrl).get('/').reply(200, mockBlogUrlResponseBody, {
+      nock(blogUrl).get('/').twice().reply(200, mockBlogUrlResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -56,7 +56,7 @@ describe('POST /', () => {
       `;
 
       // Mocking the response body html when call GET request to blog url
-      nock(blogUrl1).get('/').reply(200, mockBlogUrl1ResponseBody, {
+      nock(blogUrl1).get('/').twice().reply(200, mockBlogUrl1ResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -72,7 +72,7 @@ describe('POST /', () => {
       `;
 
       // Mocking the response body html when call GET request to blog url
-      nock(blogUrl2).get('/').reply(200, mockBlogUrl2ResponseBody, {
+      nock(blogUrl2).get('/').twice().reply(200, mockBlogUrl2ResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -131,7 +131,7 @@ describe('POST /', () => {
       </html>`;
 
       // Mocking the response body html (send back nothing) when call GET request to blog url
-      nock(blogUrl).get('/').reply(200, mockBlogBody, {
+      nock(blogUrl).get('/').twice().reply(200, mockBlogBody, {
         'Content-Type': 'text/html',
       });
 
@@ -199,7 +199,7 @@ describe('POST /', () => {
       };
 
       // Mocking the response body html when call GET request to blog url
-      nock(blogUrl).get('/').reply(200, mockBlogUrlResponseBody, {
+      nock(blogUrl).get('/').twice().reply(200, mockBlogUrlResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -227,7 +227,7 @@ describe('POST /', () => {
       };
 
       // Mocking the response body html when call GET request to blog url
-      nock(blogUrl).get('/').reply(200, mockBlogUrlResponseBody, {
+      nock(blogUrl).get('/').twice().reply(200, mockBlogUrlResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -255,7 +255,7 @@ describe('POST /', () => {
       };
 
       // Mocking the response body html when call GET request to blog url
-      nock(blogUrl).get('/').reply(200, mockBlogUrlResponseBody, {
+      nock(blogUrl).get('/').twice().reply(200, mockBlogUrlResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -267,17 +267,25 @@ describe('POST /', () => {
       expect(res.body).toEqual(result);
     });
 
-    it('should return 200 and all feed urls if there are multiple link elements that could contain a feed url', async () => {
+    it('should return 200 and all relevant feed urls if there are multiple link elements that could contain a feed url', async () => {
       const blogUrl = 'https://test321.blogspot.com/';
       const mockBlogUrlResponseBody = `
           <!doctype html>
           <html lang="en">
             <head>
-              <link rel="alternate" type="application/x.atom+xml" href="https://test321.blogspot.com/x.atom/feeds/posts/default/-/open-source"/>
-              <link rel="alternate" type="application/x-atom+xml" href="https://test321.blogspot.com/x-atom/feeds/posts/default/-/open-source"/>
-              <link rel="alternate" type="application/json" href="https://test321.blogspot.com/json"/>
-              <link rel="alternate" type="application/json+oembed" href="https://test321.blogspot.com/oembed/?format=json"/>
-              <link rel="alternate" type="application/xml+oembed" href="https://test321.blogspot.com/oembed/?format=xml"/>
+              <link rel="alternate" type="application/x.atom+xml" href="https://test321.blogspot.com/x.atom/feeds/posts/default/-/open-source" />
+              <link rel="alternate" type="application/x-atom+xml" href="https://test321.blogspot.com/x-atom/feeds/posts/default/-/open-source" />
+              <link rel="alternate" type="application/json" href="https://test321.blogspot.com/json" />
+              <link rel="alternate" type="application/json+oembed" href="https://test321.blogspot.com/oembed/?format=json" />
+              <link rel="alternate" type="application/xml+oembed" href="https://test321.blogspot.com/oembed/?format=xml" />
+              <link rel="alternate" type="application/rss+xml" href="https://test321.blogspot.com/feeds/posts/default" />
+              <link rel="alternate" type="application/rss+xml" href="https://test321.blogspot.com/feeds/posts/default?alt=rss" />
+              <link rel="alternate" type="application/atom+xml" href="https://www.blogger.com/feeds/123/posts/default" />
+              <link rel="alternate" type="application/rss+xml" href="https://test321.wordpress.com/feed/" />
+              <link rel="alternate" type="application/rss+xml" href="https://test321.wordpress.com/comments/feed/" />
+              <link rel="alternate" type="application/json+oembed" href="https://public-api.wordpress.com/oembed/?format=json&url=https%3A%2F%2Ftest321.wordpress.com%2F&for=wpcom-auto-discovery" />
+              <link rel="alternate" type="application/rss+xml" href="https://medium.com/feed/@test321" />
+              <link rel="alternate" type="application/rss+xml" href="https://dev.to/feed/test321" />
             </head>
             <body></body>
           </html>
@@ -290,11 +298,15 @@ describe('POST /', () => {
           'https://test321.blogspot.com/json',
           'https://test321.blogspot.com/oembed/?format=json',
           'https://test321.blogspot.com/oembed/?format=xml',
+          'https://test321.blogspot.com/feeds/posts/default',
+          'https://test321.wordpress.com/feed/',
+          'https://medium.com/feed/@test321',
+          'https://dev.to/feed/test321',
         ].map((feedUrl) => ({ feedUrl, type: 'blog' })),
       };
 
       // Mocking the response body html when call GET request to blog url
-      nock(blogUrl).get('/').reply(200, mockBlogUrlResponseBody, {
+      nock(blogUrl).get('/').twice().reply(200, mockBlogUrlResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -329,7 +341,7 @@ describe('POST /', () => {
       };
 
       // Mocking the response body html when call GET request to blog url
-      nock(youTubeDomain).get(channelUri).reply(200, mockYouTubeChannelUrlResponseBody, {
+      nock(youTubeDomain).get(channelUri).twice().reply(200, mockYouTubeChannelUrlResponseBody, {
         'Content-Type': 'text/html',
       });
 
@@ -344,6 +356,37 @@ describe('POST /', () => {
     it('should return 401 if no authorization token is included in headers', async () => {
       const res = await request(app).post('/').send(['https://test321.blogspot.com/']);
       expect(res.status).toBe(401);
+    });
+
+    it.concurrent.each([
+      'application/xml',
+      'application/rss+xml',
+      'application/atom+xml',
+      'application/x.atom+xml',
+      'application/x-atom+xml',
+      'application/json',
+      'application/json+oembed',
+      'application/xml+oembed',
+    ])('should return 200 and the url when url response content type is %s', async (type) => {
+      const feedUrl = 'https://test321.blogspot.com/feed/user/';
+
+      const result = {
+        feedUrls: [
+          {
+            feedUrl,
+            type: 'blog',
+          },
+        ],
+      };
+
+      nock(feedUrl).get('/').reply(200, undefined, { 'Content-Type': type });
+      const res = await request(app)
+        .post('/')
+        .set('Authorization', `bearer ${createServiceToken()}`)
+        .send([feedUrl]);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(result);
     });
   });
 
